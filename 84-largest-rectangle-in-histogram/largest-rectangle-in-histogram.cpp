@@ -1,32 +1,42 @@
 class Solution {
 public:
     int largestRectangleArea(vector<int>& heights) {
-     int n = heights.size();
-    stack<int> st;   // stores indices
-    int maxArea = 0;
-
-    for(int i = 0; i <= n; i++) {
+        int n = heights.size();
         
-        // Treat last as 0 height to flush stack
-        while(!st.empty() && (i == n || heights[st.top()] >= heights[i])) {
-            
-            int height = heights[st.top()];
-            st.pop();
-            
-            int width;
-            
-            if(st.empty()) {
-                width = i;  
-            } else {
-                width = i - st.top() - 1;
+        vector<int> left(n), right(n);
+        stack<int> s;
+
+    // 1. Previous Smaller Element (Left smaller)
+            for(int i = 0; i < n; i++) {
+                while(!s.empty() && heights[s.top()] >= heights[i]) {
+                    s.pop();
+                }
+
+                left[i] = s.empty() ? -1 : s.top();
+                s.push(i);
             }
-            
-            maxArea = max(maxArea, height * width);
-        }
-        
-        st.push(i);
-    }
 
-    return maxArea;   
+            // Clear stack before next use
+            while(!s.empty()) s.pop();
+
+    // 2. Next Smaller Element (Right smaller)
+            for(int i = n - 1; i >= 0; i--) {
+                while(!s.empty() && heights[s.top()] >= heights[i]) {
+                    s.pop();
+                }
+
+                right[i] = s.empty() ? n : s.top();
+                s.push(i);
+            }
+
+            // 3. Calculate maximum area
+            int ans = 0;
+            for(int i = 0; i < n; i++) {
+                int width = right[i] - left[i] - 1;
+                int currArea = heights[i] * width;
+                ans = max(ans, currArea);
+            }
+
+                return ans;
     }
 };
